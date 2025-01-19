@@ -37,11 +37,11 @@ const userValidation = {
     },
   },
   role: {
-    enum: ["user", "admin", "moderator"] as const,
+    enum: ["user", "admin"] as const,
     default: "user",
     messages: {
       required: "Role is required",
-      invalid: "Role must be either 'user', 'admin', or 'moderator'",
+      invalid: "Role must be either 'user', or 'admin'",
     },
   },
   bio: {
@@ -317,7 +317,7 @@ export interface IUser extends mongoose.Document {
   email: string;
   password: string;
   avatar: string;
-  role: "user" | "admin" | "moderator";
+  role: "user" | "admin";
   bio?: string;
   location?: string;
   website?: string;

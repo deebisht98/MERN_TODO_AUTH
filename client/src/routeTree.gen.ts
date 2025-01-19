@@ -10,85 +10,123 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as HomeImport } from './routes/home'
-import { Route as IndexImport } from './routes/index'
+import { Route as rootRoute } from "./routes/__root";
+import { Route as TasksImport } from "./routes/tasks";
+import { Route as SignupImport } from "./routes/signup";
+import { Route as ProfileImport } from "./routes/profile";
+import { Route as LoginImport } from "./routes/login";
 
 // Create/Update Routes
 
-const HomeRoute = HomeImport.update({
-  id: '/home',
-  path: '/home',
+const TasksRoute = TasksImport.update({
+  id: "/tasks",
+  path: "/tasks",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
-const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+const SignupRoute = SignupImport.update({
+  id: "/signup",
+  path: "/signup",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
+
+const ProfileRoute = ProfileImport.update({
+  id: "/profile",
+  path: "/profile",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const LoginRoute = LoginImport.update({
+  id: "/login",
+  path: "/login",
+  getParentRoute: () => rootRoute,
+} as any);
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeImport
-      parentRoute: typeof rootRoute
-    }
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/profile": {
+      id: "/profile";
+      path: "/profile";
+      fullPath: "/profile";
+      preLoaderRoute: typeof ProfileImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/signup": {
+      id: "/signup";
+      path: "/signup";
+      fullPath: "/signup";
+      preLoaderRoute: typeof SignupImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/tasks": {
+      id: "/tasks";
+      path: "/tasks";
+      fullPath: "/tasks";
+      preLoaderRoute: typeof TasksImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/home': typeof HomeRoute
+  "/login": typeof LoginRoute;
+  "/profile": typeof ProfileRoute;
+  "/signup": typeof SignupRoute;
+  "/tasks": typeof TasksRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/home': typeof HomeRoute
+  "/login": typeof LoginRoute;
+  "/profile": typeof ProfileRoute;
+  "/signup": typeof SignupRoute;
+  "/tasks": typeof TasksRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/home': typeof HomeRoute
+  __root__: typeof rootRoute;
+  "/login": typeof LoginRoute;
+  "/profile": typeof ProfileRoute;
+  "/signup": typeof SignupRoute;
+  "/tasks": typeof TasksRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home'
-  id: '__root__' | '/' | '/home'
-  fileRoutesById: FileRoutesById
+  fileRoutesByFullPath: FileRoutesByFullPath;
+  fullPaths: "/login" | "/profile" | "/signup" | "/tasks";
+  fileRoutesByTo: FileRoutesByTo;
+  to: "/login" | "/profile" | "/signup" | "/tasks";
+  id: "__root__" | "/login" | "/profile" | "/signup" | "/tasks";
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute;
+  ProfileRoute: typeof ProfileRoute;
+  SignupRoute: typeof SignupRoute;
+  TasksRoute: typeof TasksRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  HomeRoute: HomeRoute,
-}
+  LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
+  SignupRoute: SignupRoute,
+  TasksRoute: TasksRoute,
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {
@@ -96,15 +134,23 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/home"
+        "/login",
+        "/profile",
+        "/signup",
+        "/tasks"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/login": {
+      "filePath": "login.tsx"
     },
-    "/home": {
-      "filePath": "home.tsx"
+    "/profile": {
+      "filePath": "profile.tsx"
+    },
+    "/signup": {
+      "filePath": "signup.tsx"
+    },
+    "/tasks": {
+      "filePath": "tasks.tsx"
     }
   }
 }
