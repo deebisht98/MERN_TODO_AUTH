@@ -1,7 +1,8 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import env from "./env.js";
 
+import env from "./env.js";
+import cors from "cors";
 import connectDB from "./db/database.js";
 import userRoutes from "./routes/userRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
@@ -13,6 +14,11 @@ if (!env.COOKIE_SECRET) {
 connectDB();
 const app = express();
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(env.COOKIE_SECRET));

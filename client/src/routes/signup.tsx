@@ -1,31 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSignupMutation } from "@/hooks/useSignupMutation";
+import { useAuth } from "@/context/AuthContext";
+
+const schema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
 
 const Signup = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{ name: string; email: string; password: string }>({
+    resolver: zodResolver(schema),
+  });
+  const { login } = useAuth();
+  const mutation = useSignupMutation(login);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      // Here you would typically send this data to your backend
-      // For now, we'll just log it
-      console.log("Username:", username);
-      console.log("Email:", email);
-      console.log("Password:", password);
-
-      toast.success("Account created successfully!");
-    } catch (error) {
-      toast.error("Failed to create account");
-    }
+  const onSubmit = (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -34,28 +41,26 @@ const Signup = () => {
         <div className="space-y-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Sign Up</h1>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Card>
               <CardHeader>
                 <CardTitle>Create Your Account</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Name</Label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" {...register("name")} />
+                  {errors.name && (
+                    <p className="text-red-500">{errors.name.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <Input id="email" {...register("email")} />
+                  {errors.email && (
+                    <p className="text-red-500">{errors.email.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -63,9 +68,11 @@ const Signup = () => {
                   <Input
                     id="password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                   />
+                  {errors.password && (
+                    <p className="text-red-500">{errors.password.message}</p>
+                  )}
                 </div>
 
                 <div className="mt-4 flex justify-between items-center">

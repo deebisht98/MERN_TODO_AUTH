@@ -21,8 +21,28 @@ export const createUser: RequestHandler = catchAsync(async (req, res) => {
   }
 
   const user = await User.create(userData);
-  const { password, ...rest } = user.toObject();
-  res.status(201).json({ success: true, data: rest });
+
+  const token = generateToken(user._id as string);
+  setTokenCookie(res, token);
+
+  user.lastLogin = new Date();
+  user.loginHistory = user.loginHistory || [];
+  user.loginHistory.push({
+    timestamp: new Date(),
+    ip: req.ip!,
+    device: req.headers["user-agent"] || "unknown",
+  });
+  await user.save();
+
+  const { _id, name, email, avatar, preferences } = user.toObject();
+
+  sendResponse(res, 201, {
+    success: true,
+    data: {
+      user: { _id, name, email, avatar, preferences },
+      token,
+    },
+  });
 });
 
 export const loginUser: RequestHandler = catchAsync(async (req, res) => {
@@ -60,12 +80,12 @@ export const loginUser: RequestHandler = catchAsync(async (req, res) => {
   });
   await user.save();
 
-  user.password = "";
+  const { _id, name, email, avatar, preferences } = user.toObject();
 
   sendResponse(res, 200, {
     success: true,
     data: {
-      user,
+      user: { _id, name, email, avatar, preferences },
       token,
     },
   });
