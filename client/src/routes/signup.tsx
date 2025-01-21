@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignupMutation } from "@/hooks/useSignupMutation";
-import { useAuth } from "@/context/AuthContext";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -24,8 +23,7 @@ const Signup = () => {
   } = useForm<{ name: string; email: string; password: string }>({
     resolver: zodResolver(schema),
   });
-  const { login } = useAuth();
-  const mutation = useSignupMutation(login);
+  const mutation = useSignupMutation();
 
   const onSubmit = (data: {
     name: string;

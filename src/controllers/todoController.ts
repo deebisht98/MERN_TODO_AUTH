@@ -7,17 +7,16 @@ import { sendResponse } from "../utils/responseHandler.js";
 export const createTodo: RequestHandler = catchAsync(async (req, res) => {
   const todoData: TodoType = (req as ValidatedRequest).validatedData?.body;
   const todo = await Todo.create({ ...todoData, user: req.user._id });
-  sendResponse(res, 201, { success: true, data: todo });
+  return sendResponse(res, 201, { success: true, data: todo });
 });
 
 export const getTodos: RequestHandler = catchAsync(async (req, res) => {
   if (req.user.role === "admin") {
     const todos = await Todo.find({});
-    sendResponse(res, 200, { success: true, data: todos });
-    return;
+    return sendResponse(res, 200, { success: true, data: todos });
   }
   const todos = await Todo.find({ user: req.user._id });
-  sendResponse(res, 200, { success: true, data: todos });
+  return sendResponse(res, 200, { success: true, data: todos });
 });
 
 export const getTodo: RequestHandler = catchAsync(async (req, res) => {
@@ -27,10 +26,13 @@ export const getTodo: RequestHandler = catchAsync(async (req, res) => {
   });
 
   if (!todo) {
-    sendResponse(res, 404, { success: false, message: "Todo not found" });
+    return sendResponse(res, 404, {
+      success: false,
+      message: "Todo not found",
+    });
   }
 
-  sendResponse(res, 200, { success: true, data: todo });
+  return sendResponse(res, 200, { success: true, data: todo });
 });
 
 export const updateTodo: RequestHandler = catchAsync(async (req, res) => {
@@ -44,10 +46,13 @@ export const updateTodo: RequestHandler = catchAsync(async (req, res) => {
   );
 
   if (!todo) {
-    sendResponse(res, 404, { success: false, message: "Todo not found" });
+    return sendResponse(res, 404, {
+      success: false,
+      message: "Todo not found",
+    });
   }
 
-  sendResponse(res, 200, { success: true, data: todo });
+  return sendResponse(res, 200, { success: true, data: todo });
 });
 
 export const deleteTodo: RequestHandler = catchAsync(async (req, res) => {
@@ -57,10 +62,13 @@ export const deleteTodo: RequestHandler = catchAsync(async (req, res) => {
   });
 
   if (!todo) {
-    sendResponse(res, 404, { success: false, message: "Todo not found" });
+    return sendResponse(res, 404, {
+      success: false,
+      message: "Todo not found",
+    });
   }
 
-  sendResponse(res, 200, {
+  return sendResponse(res, 200, {
     success: true,
     message: "Todo deleted successfully",
   });

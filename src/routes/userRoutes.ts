@@ -1,11 +1,15 @@
 import express from "express";
-import { createUser, loginUser } from "../controllers/userController.js";
-import { validateRequest } from "../middlewares/validationMiddleware.js";
-import { userLoginZodSchema, userZodSchema } from "../models/userSchema.js";
+import {
+  getLoginHistory,
+  getUserSettings,
+  updateUserSettings, // Import the function
+} from "../controllers/userController.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const userRouter = express.Router();
+userRouter.use(protect);
 
-userRouter.post("/register", validateRequest(userZodSchema), createUser);
-userRouter.post("/login", validateRequest(userLoginZodSchema), loginUser);
+userRouter.get("/loginHistory", getLoginHistory);
+userRouter.route("/settings").get(getUserSettings).patch(updateUserSettings);
 
 export default userRouter;

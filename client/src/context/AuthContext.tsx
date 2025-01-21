@@ -1,10 +1,12 @@
 import { createContext, useState, useEffect, use } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { User } from "@/types/User";
+import { checkAuth } from "@/api/authApi";
+import axiosInstance from "@/api/axiosInstance";
 
 interface AuthContextType {
   user: User | null;
-  login: (userData: User) => void;
+  setUser: (userData: User) => void;
   logout: () => void;
 }
 
@@ -15,28 +17,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!user) {
+    const authenticate = async () => {
+      try {
+        const data = await checkAuth();
+        setUser(data.user);
+      } catch (error) {
+        setUser(null);
         navigate({ to: "/login" });
-      } else {
-        navigate({ to: "/tasks" });
       }
     };
-    checkAuth();
-  }, [user, navigate]);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    navigate({ to: "/tasks" });
-  };
+    authenticate();
+  }, [navigate]);
 
-  const logout = () => {
-    setUser(null);
-    navigate({ to: "/login" });
+  const logout = async () => {
+    try {
+      await axiosInstance.post("/auth/logout");
+      setUser(null);
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

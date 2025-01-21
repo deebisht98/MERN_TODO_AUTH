@@ -1,5 +1,6 @@
 import { Response, RequestHandler } from "express";
 import mongoose from "mongoose";
+import { sendResponse } from "./responseHandler.js";
 
 export const handleControllerError = (error: unknown, res: Response): void => {
   console.error(error);
@@ -9,11 +10,9 @@ export const handleControllerError = (error: unknown, res: Response): void => {
     Object.keys(error.errors).forEach((key) => {
       errorMap[key] = error.errors[key].message;
     });
-    res.status(400).json({ success: false, errors: errorMap });
-    return;
+    return sendResponse(res, 400, { success: false, errors: errorMap });
   }
-
-  res.status(500).json({
+  return sendResponse(res, 500, {
     success: false,
     message: error instanceof Error ? error.message : "Internal server error",
   });

@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +21,7 @@ const Signup = () => {
   } = useForm<{ email: string; password: string }>({
     resolver: zodResolver(schema),
   });
-  const { login } = useAuth();
-  const mutation = useLoginMutation(login);
+  const mutation = useLoginMutation();
 
   const onSubmit = (data: { email: string; password: string }) => {
     mutation.mutate(data);

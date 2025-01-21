@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { AnyZodObject } from "zod";
 import { ValidatedRequest } from "../types/express.js";
+import { sendResponse } from "../utils/responseHandler.js";
 
 export const validateRequest = (schema: AnyZodObject): RequestHandler => {
   return async (req, res, next) => {
@@ -15,12 +16,10 @@ export const validateRequest = (schema: AnyZodObject): RequestHandler => {
             errorMap[path] = err.message;
           }
         });
-
-        res.status(400).json({
+        return sendResponse(res, 400, {
           success: false,
           errors: errorMap,
         });
-        return;
       }
 
       (req as ValidatedRequest).validatedData = {
@@ -30,11 +29,10 @@ export const validateRequest = (schema: AnyZodObject): RequestHandler => {
       };
       next();
     } catch (error) {
-      res.status(500).json({
+      return sendResponse(res, 500, {
         success: false,
         errors: { general: "Internal validation error" },
       });
-      return;
     }
   };
 };

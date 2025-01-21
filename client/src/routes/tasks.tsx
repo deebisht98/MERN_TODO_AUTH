@@ -1,46 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useFetchTasks } from "@/hooks/useFetchTasks";
+import { useUpdateTaskStatus } from "@/hooks/useUpdateTaskStatus";
 import { TaskColumn } from "@/components/TaskColumn";
 import { toast } from "sonner";
 import { NavBar } from "@/components/NavBar";
-
-// Mock data - replace with your actual data fetching logic
-const mockTasks = [
-  {
-    id: "1",
-    title: "Implement Authentication",
-    description: "Add user authentication using JWT tokens",
-    status: "Pending",
-    priority: "High",
-    dueDate: "2024-03-20",
-    tags: ["Backend", "Security"],
-  },
-  {
-    id: "2",
-    title: "Design Homepage",
-    description: "Create responsive design for the homepage",
-    status: "In Progress",
-    priority: "Medium",
-    dueDate: "2024-03-15",
-    tags: ["Frontend", "UI/UX"],
-  },
-  {
-    id: "3",
-    title: "Database Optimization",
-    description: "Optimize database queries for better performance",
-    status: "Completed",
-    priority: "Low",
-    dueDate: "2024-03-10",
-    tags: ["Database", "Performance"],
-  },
-];
+import { Task } from "@/types/Task";
 
 export const Route = createFileRoute("/tasks")({
   component: Tasks,
 });
 
 function Tasks() {
-  const [tasks, setTasks] = useState(mockTasks);
+  const { data: tasks = [], refetch } = useFetchTasks();
+  const updateTaskStatus = useUpdateTaskStatus();
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
@@ -52,25 +25,24 @@ function Tasks() {
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, status: string) => {
+  const handleDrop = async (e: React.DragEvent, status: string) => {
     e.preventDefault();
     if (!draggedTaskId) return;
 
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === draggedTaskId) {
-        return { ...task, status };
-      }
-      return task;
-    });
-
-    setTasks(updatedTasks);
-    setDraggedTaskId(null);
-    document.querySelector(".dragging")?.classList.remove("dragging");
-    toast.success(`Task moved to ${status}`);
+    try {
+      await updateTaskStatus.mutateAsync({ taskId: draggedTaskId, status });
+      refetch();
+      toast.success(`Task moved to ${status}`);
+    } catch (error) {
+      toast.error("Failed to update task status");
+    } finally {
+      setDraggedTaskId(null);
+      document.querySelector(".dragging")?.classList.remove("dragging");
+    }
   };
 
   const getTasksByStatus = (status: string) =>
-    tasks.filter((task) => task.status === status);
+    tasks.filter((task: Task) => task.status === status);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
@@ -81,25 +53,25 @@ function Tasks() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Task Board</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <TaskColumn
-              title="Pending"
-              tasks={getTasksByStatus("Pending")}
-              status="Pending"
+              title="pending"
+              tasks={getTasksByStatus("pending")}
+              status="pending"
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             />
             <TaskColumn
-              title="In Progress"
-              tasks={getTasksByStatus("In Progress")}
-              status="In Progress"
+              title="in-progress"
+              tasks={getTasksByStatus("in-progress")}
+              status="in-progress"
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             />
             <TaskColumn
-              title="Completed"
-              tasks={getTasksByStatus("Completed")}
-              status="Completed"
+              title="completed"
+              tasks={getTasksByStatus("completed")}
+              status="completed"
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDrop={handleDrop}

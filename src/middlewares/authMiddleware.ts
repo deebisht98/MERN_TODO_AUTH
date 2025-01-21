@@ -3,6 +3,14 @@ import jwt from "jsonwebtoken";
 import User from "../models/userSchema.js";
 import { sendResponse } from "../utils/responseHandler.js";
 import env from "../env.js";
+import {
+  generateToken,
+  setTokenCookie,
+  isTokenExpired,
+  isTokenRevoked,
+} from "../utils/tokenHandler.js";
+import { accessTokenExpiry } from "../constants.js";
+
 declare global {
   namespace Express {
     interface Request {
@@ -11,18 +19,29 @@ declare global {
   }
 }
 
+const verifyAndSetUser = async (token: string, res: any, req: any) => {
+  const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string };
+  const user = await User.findById(decoded.id).select("-password");
+  if (!user) {
+    return sendResponse(res, 401, {
+      success: false,
+      message: "User no longer exists",
+    });
+  }
+  req.user = user;
+};
+
+const isRefreshTokenRevoked = async (token: string) => {
+  const isRevoked = await isTokenRevoked(token); // This line checks the refresh token in the database
+  return isRevoked;
+};
+
 export const protect: RequestHandler = async (req, res, next) => {
   try {
-    let token;
+    let { accessToken } = req.cookies;
 
-    if (req.signedCookies.token) {
-      token = req.signedCookies.token;
-    } else if (req.headers.authorization?.startsWith("Bearer")) {
-      token = req.headers.authorization.split(" ")[1];
-    }
-
-    if (!token) {
-      sendResponse(res, 401, {
+    if (!accessToken) {
+      return sendResponse(res, 401, {
         success: false,
         message: "Not authorized, please log in",
       });
@@ -32,29 +51,32 @@ export const protect: RequestHandler = async (req, res, next) => {
       throw new Error("JWT_SECRET is not defined in environment variables");
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as {
-      id: string;
-    };
+    if (isTokenExpired(accessToken)) {
+      const { refreshToken } = req.cookies;
+      if (!refreshToken || isTokenExpired(refreshToken)) {
+        return sendResponse(res, 401, {
+          success: false,
+          message: "Session expired, please log in again",
+        });
+      }
+      const isRevoked = await isRefreshTokenRevoked(refreshToken);
+      if (isRevoked) {
+        return sendResponse(res, 401, {
+          success: false,
+          message: "Refresh token is revoked",
+        });
+      }
 
-    const user = await User.findById(decoded.id).select("-password");
-    if (!user) {
-      sendResponse(res, 401, {
-        success: false,
-        message: "User no longer exists",
-      });
+      await verifyAndSetUser(refreshToken, res, req);
+      const newAccessToken = generateToken(req.user.id, "15m");
+      setTokenCookie(res, newAccessToken, "accessToken", accessTokenExpiry);
+      next();
     }
 
-    req.user = user;
+    await verifyAndSetUser(accessToken, res, req);
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      sendResponse(res, 401, {
-        success: false,
-        message: "Invalid token, please log in again",
-      });
-    }
-
-    sendResponse(res, 401, {
+    return sendResponse(res, 401, {
       success: false,
       message: "Not authorized, please log in",
     });
