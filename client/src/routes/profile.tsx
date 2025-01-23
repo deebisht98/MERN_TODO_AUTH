@@ -1,195 +1,212 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
-import { Github, Twitter, Linkedin, User } from "lucide-react";
+import { toast } from "sonner";
+import { LogOut, User, Twitter, Linkedin, Github } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
+import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "next-themes";
 
-const mockUser = {
-  name: "John Doe",
-  email: "john@example.com",
-  avatar: "",
-  role: "user",
-  bio: "Full-stack developer passionate about creating beautiful user experiences",
-  location: "San Francisco, CA",
-  website: "https://johndoe.dev",
-  socialLinks: {
-    twitter: "johndoe",
-    linkedin: "johndoe",
-    github: "johndoe",
-  },
-  preferences: {
-    theme: "system",
-    notifications: "important",
-    language: "en",
-  },
-};
-
-export const Route = createFileRoute("/profile")({
-  component: Profile,
+const profileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+  location: z.string().optional().nullable(),
+  website: z.string().url("Please enter a valid URL").optional().nullable(),
+  socialLinks: z.object({
+    twitter: z.string().optional().nullable(),
+    linkedin: z.string().optional().nullable(),
+    github: z.string().optional().nullable(),
+  }),
+  preferences: z.object({
+    theme: z.enum(["light", "dark", "system"]),
+    notifications: z.enum(["all", "important", "none"]),
+    language: z.enum(["en", "es", "fr", "de", "zh"]),
+  }),
 });
 
-function Profile() {
-  const [user, setUser] = useState(mockUser);
-  const [isEditing, setIsEditing] = useState(false);
+type ProfileFormData = z.infer<typeof profileSchema>;
 
-  const handleSave = () => {
-    // Here you would make an API call to update the user profile
-    toast.success("Profile updated successfully!");
-    setIsEditing(false);
+function Profile() {
+  const { user, logout } = useAuth();
+  const { setTheme } = useTheme();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: user?.name || "",
+      bio: "",
+      location: "",
+      website: "",
+      socialLinks: {
+        twitter: "",
+        linkedin: "",
+        github: "",
+      },
+      preferences: {
+        theme: "system",
+        notifications: "all",
+        language: "en",
+      },
+    },
+  });
+
+  const onSubmit = async (data: ProfileFormData) => {
+    setIsSubmitting(true);
+    try {
+      // API call to update profile
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Profile updated successfully!");
+      reset(data);
+    } catch (error) {
+      toast.error("Failed to update profile");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLogoutAllDevices = async () => {
+    try {
+      // API call to logout from all devices
+      await logout();
+      toast.success("Logged out from all devices");
+    } catch (error) {
+      toast.error("Failed to logout from all devices");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
       <NavBar />
 
-      <div className="container mx-auto py-8 px-4 max-w-4xl">
-        <div className="space-y-8">
-          {/* Profile Header */}
+      <div className="container mx-auto py-8 px-4 max-w-2xl">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={user.avatar} />
+                <AvatarImage src={user?.avatar || ""} />
                 <AvatarFallback>
                   <User className="h-10 w-10" />
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-2xl font-bold">{user.name}</h1>
-                <p className="text-muted-foreground">{user.email}</p>
+                <h1 className="text-2xl font-bold">{user?.name || ""}</h1>
+                <p className="text-muted-foreground">{user?.email || ""}</p>
               </div>
             </div>
-            <Button
-              onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-              className="ml-4"
-            >
-              {isEditing ? "Save Changes" : "Edit Profile"}
-            </Button>
           </div>
 
-          {/* Personal Information */}
-          <Card>
+          <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle>Profile Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={user.name}
-                    readOnly={!isEditing}
-                    onChange={(e) => setUser({ ...user, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={user.location}
-                    readOnly={!isEditing}
-                    onChange={(e) =>
-                      setUser({ ...user, location: e.target.value })
-                    }
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  {...register("name")}
+                  className="h-11 bg-white"
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                )}
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
-                  value={user.bio}
-                  readOnly={!isEditing}
-                  onChange={(e) => setUser({ ...user, bio: e.target.value })}
-                  className="min-h-[100px]"
+                  {...register("bio")}
+                  className="min-h-[100px] bg-white"
+                  placeholder="Tell us about yourself"
                 />
+                {errors.bio && (
+                  <p className="text-red-500 text-sm">{errors.bio.message}</p>
+                )}
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="website">Website</Label>
+                <Label htmlFor="location">Location</Label>
                 <Input
-                  id="website"
-                  value={user.website}
-                  readOnly={!isEditing}
-                  onChange={(e) =>
-                    setUser({ ...user, website: e.target.value })
-                  }
+                  id="location"
+                  {...register("location")}
+                  className="h-11 bg-white"
+                  placeholder="City, Country"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Social Links */}
-          <Card>
+          <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Social Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Twitter */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Twitter className="h-4 w-4" /> Twitter
                   </Label>
                   <Input
-                    value={user.socialLinks?.twitter || ""}
-                    readOnly={!isEditing}
-                    onChange={(e) =>
-                      setUser({
-                        ...user,
-                        socialLinks: {
-                          ...user.socialLinks,
-                          twitter: e.target.value,
-                        },
-                      })
-                    }
+                    {...register("socialLinks.twitter")}
+                    className="h-11 bg-white"
+                    placeholder="@username"
                   />
                 </div>
+                {/* LinkedIn */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Linkedin className="h-4 w-4" /> LinkedIn
                   </Label>
                   <Input
-                    value={user.socialLinks?.linkedin || ""}
-                    readOnly={!isEditing}
-                    onChange={(e) =>
-                      setUser({
-                        ...user,
-                        socialLinks: {
-                          ...user.socialLinks,
-                          linkedin: e.target.value,
-                        },
-                      })
-                    }
+                    {...register("socialLinks.linkedin")}
+                    className="h-11 bg-white"
+                    placeholder="Profile URL"
                   />
                 </div>
+                {/* GitHub */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Github className="h-4 w-4" /> GitHub
                   </Label>
                   <Input
-                    value={user.socialLinks?.github || ""}
-                    readOnly={!isEditing}
-                    onChange={(e) =>
-                      setUser({
-                        ...user,
-                        socialLinks: {
-                          ...user.socialLinks,
-                          github: e.target.value,
-                        },
-                      })
-                    }
+                    {...register("socialLinks.github")}
+                    className="h-11 bg-white"
+                    placeholder="Username"
                   />
                 </div>
               </div>
@@ -197,88 +214,142 @@ function Profile() {
           </Card>
 
           {/* Preferences */}
-          <Card>
+          <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Preferences</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Theme */}
                 <div className="space-y-2">
                   <Label htmlFor="theme">Theme</Label>
-                  <Select
-                    disabled={!isEditing}
-                    value={user.preferences.theme}
-                    onValueChange={(value: "light" | "dark" | "system") =>
-                      setUser({
-                        ...user,
-                        preferences: { ...user.preferences, theme: value },
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="system">System</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="preferences.theme"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={(value) => {
+                          console.log("🚀 ~ Profile ~ value:", value);
+                          setTheme(value);
+                          field.onChange(value);
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="h-11 bg-white">
+                          <SelectValue placeholder="Select theme" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Light</SelectItem>
+                          <SelectItem value="dark">Dark</SelectItem>
+                          <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
+                {/* Notifications */}
                 <div className="space-y-2">
                   <Label htmlFor="notifications">Notifications</Label>
-                  <Select
-                    disabled={!isEditing}
-                    value={user.preferences.notifications}
-                    onValueChange={(value: "all" | "important" | "none") =>
-                      setUser({
-                        ...user,
-                        preferences: {
-                          ...user.preferences,
-                          notifications: value,
-                        },
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="important">Important Only</SelectItem>
-                      <SelectItem value="none">None</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="preferences.notifications"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="h-11 bg-white">
+                          <SelectValue placeholder="Select notifications" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                          <SelectItem value="important">
+                            Important Only
+                          </SelectItem>
+                          <SelectItem value="none">None</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
+                {/* Language */}
                 <div className="space-y-2">
                   <Label htmlFor="language">Language</Label>
-                  <Select
-                    disabled={!isEditing}
-                    value={user.preferences.language}
-                    onValueChange={(value: "en" | "es" | "fr" | "de" | "zh") =>
-                      setUser({
-                        ...user,
-                        preferences: { ...user.preferences, language: value },
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
-                      <SelectItem value="zh">Chinese</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="preferences.language"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="h-11 bg-white">
+                          <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="en">English</SelectItem>
+                          <SelectItem value="es">Spanish</SelectItem>
+                          <SelectItem value="fr">French</SelectItem>
+                          <SelectItem value="de">German</SelectItem>
+                          <SelectItem value="zh">Chinese</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+
+          <div className="flex justify-between pt-4">
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </div>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Logout from All Devices
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will log you out from all devices where you're
+                    currently signed in.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleLogoutAllDevices}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Yes, logout from all devices
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </form>
       </div>
     </div>
   );
 }
+
+export const Route = createFileRoute("/profile")({
+  component: Profile,
+});

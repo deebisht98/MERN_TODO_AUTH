@@ -6,21 +6,18 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "@/context/ThemeContext";
 import { NotFound } from "@/components/NotFound";
 
 export const rootRoute = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider>
-          <div className="bg-background text-foreground">
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </div>
-        </ThemeProvider>
+        <div className="bg-background text-foreground">
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </div>
         <Outlet />
         <TanStackRouterDevtools />
       </AuthProvider>

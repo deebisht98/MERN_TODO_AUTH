@@ -1,10 +1,8 @@
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import {
@@ -33,6 +31,10 @@ export function NavBar() {
     }
   };
 
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+  };
+
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4 container mx-auto justify-between">
@@ -47,22 +49,12 @@ export function NavBar() {
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Profile</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="w-[240px] p-2">
-                  <Link
-                    to="/profile"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">
-                      Profile
-                    </div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      Manage your account settings
-                    </p>
-                  </Link>
-                </div>
-              </NavigationMenuContent>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
+                <Link to="/profile">Profile</Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
@@ -77,15 +69,15 @@ export function NavBar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>
+              <DropdownMenuItem onClick={() => handleThemeChange("light")}>
                 <Sun className="h-4 w-4 mr-2" />
                 <span>Light</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
+              <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
                 <Moon className="h-4 w-4 mr-2" />
                 <span>Dark</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
+              <DropdownMenuItem onClick={() => handleThemeChange("system")}>
                 <Laptop className="h-4 w-4 mr-2" />
                 <span>System</span>
               </DropdownMenuItem>

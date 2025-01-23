@@ -1,12 +1,14 @@
 import { TaskCard } from "./TaskCard";
+import { Task, TaskStatus } from "@/types/Task";
 
 interface TaskColumnProps {
   title: string;
-  tasks: any[];
-  status: string;
-  onDragStart: (e: React.DragEvent, taskId: string) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent, status: string) => void;
+  tasks: Task[];
+  status: TaskStatus;
+  className?: string;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string) => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, status: TaskStatus) => void;
 }
 
 export const TaskColumn = ({
@@ -16,15 +18,16 @@ export const TaskColumn = ({
   onDragStart,
   onDragOver,
   onDrop,
+  className,
 }: TaskColumnProps) => {
   return (
     <div
-      className={`column status-${status.toLowerCase().replace(" ", "-")}`}
+      className={`p-4 rounded-lg ${className}`}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, status)}
     >
-      <div className="column-header">
-        <span>{title}</span>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold capitalize">{title}</h2>
         <span className="bg-primary/20 text-primary text-sm px-2 py-1 rounded-full">
           {tasks.length}
         </span>
@@ -32,9 +35,9 @@ export const TaskColumn = ({
       <div className="space-y-3">
         {tasks.map((task) => (
           <div
-            key={task.id}
+            key={task._id}
             draggable
-            onDragStart={(e) => onDragStart(e, task.id)}
+            onDragStart={(e) => onDragStart(e, task._id)}
           >
             <TaskCard task={task} />
           </div>

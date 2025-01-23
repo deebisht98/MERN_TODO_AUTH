@@ -2,16 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { CalendarDays, Tag } from "lucide-react";
 import { format } from "date-fns";
+import { Task } from "@/types/Task";
 
 interface TaskCardProps {
-  task: {
-    title: string;
-    description: string;
-    status: string;
-    priority: string;
-    dueDate: string;
-    tags: string[];
-  };
+  task: Task;
 }
 
 export const TaskCard = ({ task }: TaskCardProps) => {
@@ -32,7 +26,9 @@ export const TaskCard = ({ task }: TaskCardProps) => {
     <Card className="task-card">
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-semibold text-lg">{task.title}</h3>
-        <Badge className={getPriorityClass(task.priority)}>{task.priority}</Badge>
+        <Badge className={getPriorityClass(task.priority)}>
+          {task.priority}
+        </Badge>
       </div>
       <p className="text-gray-600 text-sm mb-3">{task.description}</p>
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -52,4 +48,17 @@ export const TaskCard = ({ task }: TaskCardProps) => {
       </div>
     </Card>
   );
+};
+
+const getPriorityColor = (priority: Task["priority"]) => {
+  switch (priority) {
+    case "high":
+      return "bg-red-100 text-red-700";
+    case "medium":
+      return "bg-yellow-100 text-yellow-700";
+    case "low":
+      return "bg-green-100 text-green-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
 };
