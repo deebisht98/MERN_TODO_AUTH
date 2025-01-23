@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,22 +32,88 @@ import { LogOut, User, Twitter, Linkedin, Github } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "next-themes";
+import { useUpdateSettings } from "@/hooks/useUpdateSettings";
+import type { UserSettings } from "@/api/userApi";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+  bio: z
+    .string()
+    .max(500, "Bio must be less than 500 characters")
+    .optional()
+    .nullable(),
   location: z.string().optional().nullable(),
-  website: z.string().url("Please enter a valid URL").optional().nullable(),
-  socialLinks: z.object({
-    twitter: z.string().optional().nullable(),
-    linkedin: z.string().optional().nullable(),
-    github: z.string().optional().nullable(),
-  }),
-  preferences: z.object({
-    theme: z.enum(["light", "dark", "system"]),
-    notifications: z.enum(["all", "important", "none"]),
-    language: z.enum(["en", "es", "fr", "de", "zh"]),
-  }),
+  website: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((value) => {
+      if (value) {
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return true;
+    }, "Please enter a valid URL"),
+  socialLinks: z
+    .object({
+      twitter: z
+        .string()
+        .optional()
+        .nullable()
+        .refine((value) => {
+          if (value) {
+            try {
+              new URL(value);
+              return true;
+            } catch {
+              return false;
+            }
+          }
+          return true;
+        }, "Please enter a valid URL"),
+      linkedin: z
+        .string()
+        .optional()
+        .nullable()
+        .refine((value) => {
+          if (value) {
+            try {
+              new URL(value);
+              return true;
+            } catch {
+              return false;
+            }
+          }
+          return true;
+        }, "Please enter a valid URL"),
+      github: z
+        .string()
+        .optional()
+        .nullable()
+        .refine((value) => {
+          if (value) {
+            try {
+              new URL(value);
+              return true;
+            } catch {
+              return false;
+            }
+          }
+          return true;
+        }, "Please enter a valid URL"),
+    })
+    .optional(),
+  preferences: z
+    .object({
+      theme: z.enum(["light", "dark", "system"]).optional(),
+      notifications: z.enum(["all", "important", "none"]).optional(),
+      language: z.enum(["en", "es", "fr", "de", "zh"]).optional(),
+    })
+    .optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -64,29 +130,32 @@ function Profile() {
     reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
+  });
+
+  useEffect(() => {
+    reset({
       name: user?.name || "",
-      bio: "",
-      location: "",
-      website: "",
+      bio: user?.bio || "",
+      location: user?.location || "",
       socialLinks: {
-        twitter: "",
-        linkedin: "",
-        github: "",
+        twitter: user?.socialLinks?.twitter || "",
+        linkedin: user?.socialLinks?.linkedin || "",
+        github: user?.socialLinks?.github || "",
       },
       preferences: {
-        theme: "system",
-        notifications: "all",
-        language: "en",
+        theme: user?.preferences?.theme || "system",
+        notifications: user?.preferences?.notifications || "all",
+        language: user?.preferences?.language || "en",
       },
-    },
-  });
+    });
+  }, [user, reset]);
+
+  const updateSettingsMutation = useUpdateSettings();
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsSubmitting(true);
     try {
-      // API call to update profile
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await updateSettingsMutation.mutateAsync(data as UserSettings);
       toast.success("Profile updated successfully!");
       reset(data);
     } catch (error) {

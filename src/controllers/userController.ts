@@ -17,14 +17,16 @@ export const getLoginHistory: RequestHandler = catchAsync(async (req, res) => {
 
 export const getUserSettings: RequestHandler = catchAsync(async (req, res) => {
   const userId = req.user._id;
-  const user = await User.findById(userId).select("loginHistory");
+  const user = await User.findById(userId).select(
+    "_id bio name email avatar preferences socialLinks location"
+  );
   if (!user) {
     return sendResponse(res, 404, {
       success: false,
       message: "User not found",
     });
   }
-  return sendResponse(res, 200, { success: true, data: user.loginHistory });
+  return sendResponse(res, 200, { success: true, data: user });
 });
 
 export const updateUserSettings: RequestHandler = catchAsync(
@@ -40,13 +42,17 @@ export const updateUserSettings: RequestHandler = catchAsync(
 
     const { settings } = req.body;
 
-    const updatedUser = { ...user, ...settings };
-    await updatedUser.save();
+    Object.assign(user, settings);
+    await user.save();
+
+    const updatedUser = await User.findById(req.user.id).select(
+      "_id bio name email avatar preferences socialLinks location"
+    );
 
     return sendResponse(res, 200, {
       success: true,
       message: "Settings updated successfully",
-      data: user,
+      data: updatedUser,
     });
   }
 );

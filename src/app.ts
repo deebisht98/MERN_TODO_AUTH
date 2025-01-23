@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:8080"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Initial-Auth-Check"],
     exposedHeaders: ["Set-Cookie"],
   })

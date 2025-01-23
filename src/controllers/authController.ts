@@ -53,12 +53,22 @@ export const createUser: RequestHandler = catchAsync(async (req, res) => {
   });
   await user.save();
 
-  const { _id, name, email, avatar, preferences } = user.toObject();
+  const { _id, bio, name, email, avatar, preferences, socialLinks, location } =
+    user.toObject();
 
   return sendResponse(res, 201, {
     success: true,
     data: {
-      user: { _id, name, email, avatar, preferences },
+      user: {
+        _id,
+        bio,
+        name,
+        email,
+        avatar,
+        preferences,
+        socialLinks,
+        location,
+      },
     },
   });
 });
@@ -103,12 +113,22 @@ export const loginUser: RequestHandler = catchAsync(async (req, res) => {
   });
   await user.save();
 
-  const { _id, name, email, avatar, preferences } = user.toObject();
+  const { _id, bio, name, email, avatar, preferences, socialLinks, location } =
+    user.toObject();
 
   return sendResponse(res, 200, {
     success: true,
     data: {
-      user: { _id, name, email, avatar, preferences },
+      user: {
+        _id,
+        bio,
+        name,
+        email,
+        avatar,
+        preferences,
+        socialLinks,
+        location,
+      },
     },
   });
 });
@@ -163,7 +183,9 @@ export const checkAuth: RequestHandler = catchAsync(async (req, res) => {
     });
   }
 
-  const user = await User.findById(userId).select("-password");
+  const user = await User.findById(userId).select(
+    "_id bio name email avatar preferences socialLinks location"
+  );
   if (!user) {
     return sendResponse(res, 401, {
       success: false,

@@ -295,9 +295,6 @@ const userSchema = new mongoose.Schema(
         location: String,
       },
     ],
-    verificationToken: String,
-    resetPasswordToken: String,
-    resetPasswordExpire: Date,
   },
   {
     timestamps: true,
@@ -348,9 +345,6 @@ export interface IUser extends mongoose.Document {
     device: string;
     location?: string;
   }>;
-  verificationToken?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpire?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(enteredPassword: string): Promise<boolean>;

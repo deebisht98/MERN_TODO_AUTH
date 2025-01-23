@@ -17,9 +17,12 @@ export const useSignupMutation = () => {
           _id: data.data.user._id,
           email: data.data.user.email,
           name: data.data.user.name,
+          bio: data.data.user.bio,
           avatar: data.data.user.avatar,
           preferences: data.data.user.preferences,
           token: data.data.token,
+          socialLinks: data.data.user.socialLinks,
+          location: data.data.user.location,
         });
         toast.success("Your account has been created successfully!");
         navigate({ to: "/tasks" });
