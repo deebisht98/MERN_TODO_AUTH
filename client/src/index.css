@@ -28,6 +28,33 @@
     --radius: 0.75rem;
   }
 
+  :root {
+    color-scheme: light dark;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 263 83% 58%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 24 95% 53%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 263 83% 58%;
+  }
+
   * {
     @apply border-border;
   }
@@ -38,39 +65,39 @@
 }
 
 .task-card {
-  @apply bg-white rounded-lg shadow-md p-4 mb-3 cursor-move hover:shadow-lg transition-shadow;
+  @apply bg-card text-card-foreground rounded-lg shadow-md p-4 mb-3 cursor-move hover:shadow-lg transition-shadow;
 }
 
 .column {
-  @apply bg-gray-50 p-4 rounded-xl min-h-[500px] w-full;
+  @apply bg-muted p-4 rounded-xl min-h-[500px] w-full;
 }
 
 .column-header {
-  @apply text-lg font-semibold mb-4 flex items-center gap-2;
+  @apply text-lg font-semibold mb-4 flex items-center gap-2 text-foreground;
 }
 
 .priority-high {
-  @apply bg-secondary/10 text-secondary;
+  @apply bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary-foreground;
 }
 
 .priority-medium {
-  @apply bg-yellow-100 text-yellow-700;
+  @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400;
 }
 
 .priority-low {
-  @apply bg-green-100 text-green-700;
+  @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400;
 }
 
 .status-pending {
-  @apply bg-gray-100;
+  @apply bg-muted text-muted-foreground;
 }
 
 .status-in-progress {
-  @apply bg-yellow-50;
+  @apply bg-yellow-50 dark:bg-yellow-900/20;
 }
 
 .status-completed {
-  @apply bg-green-50;
+  @apply bg-green-50 dark:bg-green-900/20;
 }
 
 .dragging {

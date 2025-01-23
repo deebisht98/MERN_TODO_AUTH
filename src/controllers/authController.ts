@@ -12,6 +12,7 @@ import {
 } from "../utils/tokenHandler.js";
 import { accessTokenExpiry, refreshTokenExpiry } from "../constants.js";
 import { catchAsync } from "../utils/errorHandler.js";
+import RefreshToken from "../models/refreshTokenSchema.js";
 
 export const createUser: RequestHandler = catchAsync(async (req, res) => {
   const userData: UserRegisterType = (req as ValidatedRequest).validatedData
@@ -113,11 +114,21 @@ export const loginUser: RequestHandler = catchAsync(async (req, res) => {
 });
 
 export const logoutUser: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user._id;
-  const allDevices = req.query.allDevices === "true";
+  const userId = req.user?._id;
+  if (!userId) {
+    return sendResponse(res, 401, {
+      success: false,
+      message: "Not authenticated",
+    });
+  }
+
+  const refreshToken = req.cookies.refreshToken;
+  const allDevices = req.body.allDevices === true;
 
   if (allDevices) {
     await revokeAllRefreshTokens(userId);
+  } else if (refreshToken) {
+    await RefreshToken.deleteOne({ token: refreshToken });
   }
 
   clearTokenCookie(res, "accessToken");

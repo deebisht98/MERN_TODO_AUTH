@@ -18,7 +18,7 @@ export const validateRequest = (schema: AnyZodObject): RequestHandler => {
         });
         return sendResponse(res, 400, {
           success: false,
-          errors: errorMap,
+          validationErrors: errorMap,
         });
       }
 
@@ -31,7 +31,7 @@ export const validateRequest = (schema: AnyZodObject): RequestHandler => {
     } catch (error) {
       return sendResponse(res, 500, {
         success: false,
-        errors: { general: "Internal validation error" },
+        message: "Internal validation error",
       });
     }
   };

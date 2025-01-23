@@ -3,9 +3,11 @@ import { toast } from "sonner";
 import { loginUser } from "@/api/authApi";
 import { useAuth } from "../context/AuthContext";
 import { LoginResponse } from "../types/User";
+import { useNavigate } from "@tanstack/react-router";
 
 export const useLoginMutation = () => {
   const { setUser } = useAuth();
+  const navigate = useNavigate();
 
   return useMutation<LoginResponse, Error, { email: string; password: string }>(
     {
@@ -20,6 +22,7 @@ export const useLoginMutation = () => {
           token: data.data.token,
         });
         toast.success("Logged in successfully!");
+        navigate({ to: "/tasks" });
       },
       onError: (error) => {
         toast.error(error.message || "Failed to log in");

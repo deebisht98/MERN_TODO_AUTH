@@ -101,7 +101,16 @@ export const userZodSchema = z.object({
       invalid_type_error: userValidation.name.messages.invalid,
     })
     .min(userValidation.name.minLength, userValidation.name.messages.min)
-    .max(userValidation.name.maxLength, userValidation.name.messages.max),
+    .max(userValidation.name.maxLength, userValidation.name.messages.max)
+    .default(
+      [
+        "Sir Quacksalot",
+        "Captain Noodles",
+        "Lord Fluffington",
+        "Doctor Giggles",
+        "Princess Sparklepants",
+      ][Math.floor(Math.random() * 5)]
+    ),
   email: z
     .string({
       required_error: userValidation.email.messages.required,

@@ -32,7 +32,10 @@ export const updateUserSettings: RequestHandler = catchAsync(
     const user = await User.findById(req.user.id).select("-password");
 
     if (!user) {
-      return sendResponse(res, 404, { message: "User not found" });
+      return sendResponse(res, 404, {
+        success: false,
+        message: "User not found",
+      });
     }
 
     const { settings } = req.body;
@@ -41,6 +44,7 @@ export const updateUserSettings: RequestHandler = catchAsync(
     await updatedUser.save();
 
     return sendResponse(res, 200, {
+      success: true,
       message: "Settings updated successfully",
       data: user,
     });

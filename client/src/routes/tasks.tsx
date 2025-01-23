@@ -12,7 +12,8 @@ export const Route = createFileRoute("/tasks")({
 });
 
 function Tasks() {
-  const { data: tasks = [], refetch } = useFetchTasks();
+  const { data, refetch } = useFetchTasks();
+  const tasks = (data?.data as Task[]) ?? [];
   const updateTaskStatus = useUpdateTaskStatus();
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
 

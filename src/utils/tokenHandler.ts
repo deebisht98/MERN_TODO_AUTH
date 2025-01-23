@@ -61,7 +61,7 @@ export const revokeAllRefreshTokens = async (userId: string): Promise<void> => {
 };
 
 export const isTokenRevoked = async (token: string): Promise<boolean> => {
-  const refreshToken = await RefreshToken.findOne({ token }); // This line checks the refresh token in the database
+  const refreshToken = await RefreshToken.findOne({ token });
   return !refreshToken;
 };
 

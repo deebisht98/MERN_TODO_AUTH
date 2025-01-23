@@ -1,38 +1,65 @@
 import { createContext, useState, useEffect, use } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import { User } from "@/types/User";
-import { checkAuth } from "@/api/authApi";
-import axiosInstance from "@/api/axiosInstance";
+import { checkAuth, logoutUser } from "@/api/authApi";
+
+const PUBLIC_ROUTES = ["/login", "/register", "/forgot-password"];
 
 interface AuthContextType {
   user: User | null;
-  setUser: (userData: User) => void;
-  logout: () => void;
+  setUser: (userData: User | null) => void;
+  logout: () => Promise<void>;
+  isLoading: boolean;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAuthenticated = !!user;
+  const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
 
   useEffect(() => {
-    const authenticate = async () => {
+    const initAuth = async () => {
       try {
-        const data = await checkAuth();
-        setUser(data.user);
+        const response = await checkAuth();
+        if (response.success && response.data) {
+          setUser(response.data as User);
+          if (isPublicRoute) {
+            navigate({ to: "/tasks" });
+          }
+        }
       } catch (error) {
         setUser(null);
-        navigate({ to: "/login" });
+        if (!isPublicRoute) {
+          navigate({ to: "/login" });
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    authenticate();
-  }, [navigate]);
+    initAuth();
+  }, [navigate, isPublicRoute]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (isAuthenticated && isPublicRoute) {
+        navigate({ to: "/tasks" });
+      } else if (!isAuthenticated && !isPublicRoute) {
+        navigate({ to: "/login" });
+      }
+    }
+  }, [isAuthenticated, isPublicRoute, isLoading, navigate]);
 
   const logout = async () => {
     try {
-      await axiosInstance.post("/auth/logout");
+      await logoutUser();
       setUser(null);
       navigate({ to: "/login" });
     } catch (error) {
@@ -40,8 +67,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  if (isLoading) {
+    return null; // or your loading component
+  }
+
   return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser, logout, isLoading, isAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );

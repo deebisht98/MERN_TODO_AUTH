@@ -15,22 +15,26 @@ if (!env.COOKIE_SECRET) {
 connectDB();
 const app = express();
 
+app.use(cookieParser(env.COOKIE_SECRET)); // Move this before CORS
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:8080"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Initial-Auth-Check"],
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(env.COOKIE_SECRET));
 
+// Remove or modify the custom header middleware to avoid conflicts
 app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader(
-    "Strict-Transport-Security",
-    "max-age=31536000; includeSubDomains"
+    "Access-Control-Allow-Origin",
+    req.headers.origin || "http://localhost:5173"
   );
   next();
 });

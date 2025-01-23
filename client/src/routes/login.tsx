@@ -13,7 +13,7 @@ const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
-const Signup = () => {
+const Login = () => {
   const {
     register,
     handleSubmit,
@@ -28,48 +28,84 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4 max-w-4xl">
-        <div className="space-y-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Login</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
+      <div className="container px-4 py-12">
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+              Welcome Back
+            </h1>
+            <p className="text-gray-600 mt-2">Please sign in to continue</p>
+          </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Enter Your Credentials</CardTitle>
+            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl text-center">Login</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" {...register("email")} />
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    {...register("email")}
+                    className="h-11 bg-white"
+                    placeholder="Enter your email"
+                  />
                   {errors.email && (
-                    <p className="text-red-500">{errors.email.message}</p>
+                    <p className="text-red-500 text-sm">
+                      {errors.email.message}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </Label>
                   <Input
                     id="password"
                     type="password"
                     {...register("password")}
+                    className="h-11 bg-white"
+                    placeholder="Enter your password"
                   />
                   {errors.password && (
-                    <p className="text-red-500">{errors.password.message}</p>
+                    <p className="text-red-500 text-sm">
+                      {errors.password.message}
+                    </p>
                   )}
                 </div>
 
-                <div className="mt-4 flex justify-between items-center">
-                  <div className="flex gap-1">
-                    <p>Don't have an account?</p>
+                <div className="space-y-4">
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 transition-all duration-300"
+                    disabled={mutation.isPending}
+                  >
+                    {mutation.isPending ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Logging in...
+                      </div>
+                    ) : (
+                      "Log In"
+                    )}
+                  </Button>
+
+                  <div className="text-center text-sm">
+                    <span className="text-gray-600">
+                      Don't have an account?{" "}
+                    </span>
                     <Link
                       to="/signup"
-                      className="text-blue-500 hover:text-blue-700"
+                      className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
                     >
                       Sign Up
                     </Link>
                   </div>
-                  <Button type="submit">Log In</Button>
                 </div>
               </CardContent>
             </Card>
@@ -81,5 +117,5 @@ const Signup = () => {
 };
 
 export const Route = createFileRoute("/login")({
-  component: Signup,
+  component: Login,
 });

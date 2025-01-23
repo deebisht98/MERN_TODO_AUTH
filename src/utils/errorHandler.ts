@@ -10,7 +10,10 @@ export const handleControllerError = (error: unknown, res: Response): void => {
     Object.keys(error.errors).forEach((key) => {
       errorMap[key] = error.errors[key].message;
     });
-    return sendResponse(res, 400, { success: false, errors: errorMap });
+    return sendResponse(res, 400, {
+      success: false,
+      validationErrors: errorMap,
+    });
   }
   return sendResponse(res, 500, {
     success: false,

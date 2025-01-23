@@ -1,12 +1,18 @@
 import { Response } from "express";
 
-type ResponseData = {
-  success?: boolean;
-  status?: string;
+type SuccessResponse = {
+  success: true;
   message?: string;
   data?: any;
-  errors?: Record<string, string>;
 };
+
+type ErrorResponse = {
+  success: false;
+  message?: string;
+  validationErrors?: Record<string, string>;
+};
+
+type ResponseData = SuccessResponse | ErrorResponse;
 
 export const sendResponse = (
   res: Response,
