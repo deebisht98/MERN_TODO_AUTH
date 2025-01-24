@@ -4,13 +4,13 @@ import { updateTodoStatus } from "@/api/taskApi";
 import { Task } from "@/types/Task";
 
 export const useUpdateTaskStatus = () => {
-  return useMutation<Task, Error, { taskId: string; status: string }>({
-    mutationFn: ({ taskId, status }) => updateTodoStatus(taskId, status),
+  return useMutation<Task, Error, Partial<Task> & { taskId: string }>({
+    mutationFn: ({ taskId, ...rest }) => updateTodoStatus(taskId, rest),
     onSuccess: () => {
       toast.success("Task status updated successfully!");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to update task status");
     },
-  } as UseMutationOptions<Task, Error, { taskId: string; status: string }>);
+  } as UseMutationOptions<Task, Error, Partial<Task> & { taskId: string }>);
 };

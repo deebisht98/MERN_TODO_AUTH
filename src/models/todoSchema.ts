@@ -124,6 +124,7 @@ export const todoMongoSchema = new mongoose.Schema(
         todoValidation.description.max,
         todoValidation.description.messages.max,
       ],
+      required: [true, todoValidation.description.messages.required],
     },
     status: {
       type: String,

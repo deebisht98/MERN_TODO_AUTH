@@ -9,6 +9,8 @@ interface TaskColumnProps {
   onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, status: TaskStatus) => void;
+  onEdit: (task: Task) => void; // Add onEdit prop
+  onDelete: (taskId: string) => void; // Add onDelete prop
 }
 
 export const TaskColumn = ({
@@ -19,6 +21,8 @@ export const TaskColumn = ({
   onDragOver,
   onDrop,
   className,
+  onEdit, // Add onEdit prop
+  onDelete, // Add onDelete prop
 }: TaskColumnProps) => {
   return (
     <div
@@ -39,7 +43,8 @@ export const TaskColumn = ({
             draggable
             onDragStart={(e) => onDragStart(e, task._id)}
           >
-            <TaskCard task={task} />
+            <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} />{" "}
+            {/* Pass onEdit and onDelete props */}
           </div>
         ))}
       </div>

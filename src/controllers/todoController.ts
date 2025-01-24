@@ -3,12 +3,22 @@ import { Todo, TodoType } from "../models/todoSchema.js";
 import { ValidatedRequest } from "../types/express.js";
 import { catchAsync } from "../utils/errorHandler.js";
 import { sendResponse } from "../utils/responseHandler.js";
+import { Request, Response } from "express";
 
-export const createTodo: RequestHandler = catchAsync(async (req, res) => {
-  const todoData: TodoType = (req as ValidatedRequest).validatedData?.body;
-  const todo = await Todo.create({ ...todoData, user: req.user._id });
-  return sendResponse(res, 201, { success: true, data: todo });
-});
+export const createTodo = async (req: Request, res: Response) => {
+  try {
+    const { title, description, user } = req.body;
+    const newTodo = new Todo({
+      title,
+      description,
+      user,
+    });
+    await newTodo.save();
+    res.status(201).json({ success: true, data: newTodo });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to create todo" });
+  }
+};
 
 export const getTodos: RequestHandler = catchAsync(async (req, res) => {
   if (req.user.role === "admin") {

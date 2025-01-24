@@ -1,39 +1,41 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { CalendarDays, Tag } from "lucide-react";
-import { format } from "date-fns";
+import { CalendarDays, Tag, Trash2, Edit3 } from "lucide-react";
 import { Task } from "@/types/Task";
 
 interface TaskCardProps {
   task: Task;
+  onEdit: (task: Task) => void; // Add onEdit prop
+  onDelete: (taskId: string) => void; // Add onDelete prop
 }
 
-export const TaskCard = ({ task }: TaskCardProps) => {
-  const getPriorityClass = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "priority-high";
-      case "medium":
-        return "priority-medium";
-      case "low":
-        return "priority-low";
-      default:
-        return "priority-medium";
+export const TaskCard = ({ task, onEdit, onDelete }: TaskCardProps) => {
+  const formatDate = (date: string) => {
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return "Invalid date";
     }
+    return parsedDate.toLocaleDateString();
   };
 
   return (
     <Card className="task-card">
       <div className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-lg">{task.title}</h3>
-        <Badge className={getPriorityClass(task.priority)}>
+        <h3
+          className={`font-semibold text-lg ${
+            task.status === "completed" ? "line-through" : ""
+          }`}
+        >
+          {task.title}
+        </h3>
+        <Badge className={getPriorityColor(task.priority) + "ml-2"}>
           {task.priority}
         </Badge>
       </div>
       <p className="text-gray-600 text-sm mb-3">{task.description}</p>
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
         <CalendarDays className="w-4 h-4" />
-        <span>{format(new Date(task.dueDate), "MMM d, yyyy")}</span>
+        <span>{formatDate(task.createdAt)}</span>
       </div>
       <div className="flex flex-wrap gap-1">
         {task.tags.map((tag, index) => (
@@ -45,6 +47,14 @@ export const TaskCard = ({ task }: TaskCardProps) => {
             {tag}
           </div>
         ))}
+      </div>
+      <div className="flex gap-2 w-full justify-end">
+        <button onClick={() => onEdit(task)} className="text-blue-500">
+          <Edit3 className="w-4 h-4" />
+        </button>
+        <button onClick={() => onDelete(task._id)} className="text-red-500">
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
     </Card>
   );
