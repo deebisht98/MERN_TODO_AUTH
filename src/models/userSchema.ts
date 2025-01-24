@@ -257,6 +257,7 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       maxlength: 500,
+      default: "",
     },
     location: String,
     website: String,

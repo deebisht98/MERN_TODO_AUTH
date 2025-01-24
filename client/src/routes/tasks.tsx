@@ -9,6 +9,7 @@ import { Task, TaskStatus } from "@/types/Task";
 import { useCreateTodo } from "@/hooks/useCreateTodo";
 import { TodoForm } from "@/components/TodoForm";
 import { useDeleteTask } from "@/hooks/useDeleteTask";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 export const Route = createFileRoute("/tasks")({
   component: Tasks,
@@ -23,6 +24,8 @@ function Tasks() {
   const createTodoMutation = useCreateTodo();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (data?.data) {
@@ -118,13 +121,24 @@ function Tasks() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteClick = async (taskId: string) => {
+  const handleDeleteClick = (taskId: string) => {
+    setTaskToDelete(taskId);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
     try {
-      await deleteTaskMutation.mutateAsync({ taskId });
-      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+      await deleteTaskMutation.mutateAsync({ taskId: taskToDelete });
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => task._id !== taskToDelete)
+      );
       toast.success("Task deleted successfully");
     } catch (error) {
       toast.error("Failed to delete task");
+    } finally {
+      setShowDeleteModal(false);
+      setTaskToDelete(null);
     }
   };
 
@@ -185,6 +199,12 @@ function Tasks() {
         onSubmit={handleFormSubmit}
         onClose={() => setIsModalOpen(false)}
         isOpen={isModalOpen}
+      />
+
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        handleClose={() => setShowDeleteModal(false)}
+        handleConfirm={handleConfirmDelete}
       />
     </div>
   );

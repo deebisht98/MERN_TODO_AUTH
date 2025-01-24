@@ -295,14 +295,14 @@ function Profile() {
                   <Controller
                     name="preferences.theme"
                     control={control}
+                    defaultValue={user?.preferences?.theme || "system"}
                     render={({ field }) => (
                       <Select
                         onValueChange={(value) => {
-                          console.log("🚀 ~ Profile ~ value:", value);
                           setTheme(value);
                           field.onChange(value);
                         }}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <SelectTrigger className="h-11 bg-white">
                           <SelectValue placeholder="Select theme" />
@@ -322,10 +322,11 @@ function Profile() {
                   <Controller
                     name="preferences.notifications"
                     control={control}
+                    defaultValue={user?.preferences?.notifications || "all"}
                     render={({ field }) => (
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <SelectTrigger className="h-11 bg-white">
                           <SelectValue placeholder="Select notifications" />
@@ -347,10 +348,11 @@ function Profile() {
                   <Controller
                     name="preferences.language"
                     control={control}
+                    defaultValue={user?.preferences?.language || "en"}
                     render={({ field }) => (
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <SelectTrigger className="h-11 bg-white">
                           <SelectValue placeholder="Select language" />

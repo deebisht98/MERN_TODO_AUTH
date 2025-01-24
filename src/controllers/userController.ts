@@ -40,9 +40,7 @@ export const updateUserSettings: RequestHandler = catchAsync(
       });
     }
 
-    const { settings } = req.body;
-
-    Object.assign(user, settings);
+    Object.assign(user, req.body);
     await user.save();
 
     const updatedUser = await User.findById(req.user.id).select(
