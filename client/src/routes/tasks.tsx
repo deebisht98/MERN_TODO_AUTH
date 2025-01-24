@@ -52,6 +52,16 @@ function Tasks() {
     e.preventDefault();
     if (!draggedTaskId) return;
 
+    const draggedTask = tasks.find((task) => task._id === draggedTaskId);
+    if (draggedTask?.status === status) {
+      setDraggedTaskId(null);
+      const draggingElement = document.querySelector(".dragging");
+      if (draggingElement) {
+        draggingElement.classList.remove("dragging");
+      }
+      return;
+    }
+
     try {
       const updatedTask = await updateTaskStatus.mutateAsync({
         taskId: draggedTaskId,
@@ -175,9 +185,15 @@ function Tasks() {
                     onDragStart={handleDragStart}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
-                    className="bg-white/80 backdrop-blur-sm shadow-lg rounded-lg border-0"
-                    onEdit={handleEditClick} // Pass onEdit prop
-                    onDelete={handleDeleteClick} // Pass onDelete prop
+                    className={` backdrop-blur-sm shadow-lg rounded-lg border-0 ${
+                      status === "pending"
+                        ? "bg-red-100/50"
+                        : status === "in-progress"
+                          ? "bg-yellow-100/50"
+                          : "bg-green-100/50"
+                    }`}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
                   />
                 </div>
               )

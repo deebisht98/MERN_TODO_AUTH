@@ -44,7 +44,6 @@ export const TaskColumn = ({
             onDragStart={(e) => onDragStart(e, task._id)}
           >
             <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} />{" "}
-            {/* Pass onEdit and onDelete props */}
           </div>
         ))}
       </div>

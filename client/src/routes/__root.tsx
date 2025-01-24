@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { NotFound } from "@/components/NotFound";
 import { InactivityDialog } from "@/components/InactivityDialog";
 import { useSilentRenew } from "@/hooks/useSilentRenew";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const rootRoute = createRootRoute({
   component: App,
@@ -21,14 +22,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="bg-background text-foreground">
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-          </TooltipProvider>
-        </div>
-        <Outlet />
-        <InactivityDialog />
+        <ThemeProvider>
+          <div className="bg-background text-foreground">
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+            <Outlet />
+            <InactivityDialog />
+          </div>
+        </ThemeProvider>
         <TanStackRouterDevtools />
       </AuthProvider>
     </QueryClientProvider>

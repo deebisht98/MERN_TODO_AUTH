@@ -90,7 +90,8 @@ export function NavBar() {
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <span>{user.name}</span>
+              <span className="hidden sm:inline">{user.name}</span>{" "}
+              {/* Hide name on mobile */}
             </div>
           )}
           <Button variant="ghost" size="icon" onClick={handleLogout}>
