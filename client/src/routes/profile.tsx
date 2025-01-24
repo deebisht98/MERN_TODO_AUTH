@@ -33,6 +33,7 @@ import { NavBar } from "@/components/NavBar";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "next-themes";
 import { useUpdateSettings } from "@/hooks/useUpdateSettings";
+import { useDeleteUser } from "@/hooks/useDeleteUser";
 import type { UserSettings } from "@/api/userApi";
 
 const profileSchema = z.object({
@@ -151,6 +152,7 @@ function Profile() {
   }, [user, reset]);
 
   const updateSettingsMutation = useUpdateSettings();
+  const deleteUserMutation = useDeleteUser();
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsSubmitting(true);
@@ -172,6 +174,15 @@ function Profile() {
       toast.success("Logged out from all devices");
     } catch (error) {
       toast.error("Failed to logout from all devices");
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      await deleteUserMutation.mutateAsync();
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete user");
     }
   };
 
@@ -372,10 +383,10 @@ function Profile() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-between pt-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-4">
             <Button
               type="submit"
-              className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
+              className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 shadow-lg transform transition-transform hover:scale-105"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -390,7 +401,10 @@ function Profile() {
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="gap-2">
+                <Button
+                  variant="destructive"
+                  className="w-full md:w-auto gap-2 bg-red-500 hover:bg-red-600 shadow-lg transform transition-transform hover:scale-105"
+                >
                   <LogOut className="h-4 w-4" />
                   Logout from All Devices
                 </Button>
@@ -410,6 +424,35 @@ function Profile() {
                     className="bg-red-500 hover:bg-red-600"
                   >
                     Yes, logout from all devices
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="w-full md:w-auto gap-2 bg-red-500 hover:bg-red-600 shadow-lg transform transition-transform hover:scale-105"
+                >
+                  Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteUser}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Yes, delete my account
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

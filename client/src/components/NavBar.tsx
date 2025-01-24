@@ -17,10 +17,11 @@ import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function NavBar() {
   const { setTheme } = useTheme();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -59,7 +60,7 @@ export function NavBar() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -83,6 +84,15 @@ export function NavBar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {user && (
+            <div className="flex items-center gap-2">
+              <Avatar>
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <span>{user.name}</span>
+            </div>
+          )}
           <Button variant="ghost" size="icon" onClick={handleLogout}>
             <LogOut className="h-5 w-5" />
             <span className="sr-only">Logout</span>

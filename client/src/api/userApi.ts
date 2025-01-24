@@ -31,3 +31,13 @@ export const updateUserSettings = async (
 
   return response.data;
 };
+
+export const deleteUser = async (): Promise<SuccessResponse> => {
+  const response = await axiosInstance.delete<SuccessResponse | ErrorResponse>(
+    "/users/deleteAccount"
+  );
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to delete user");
+  }
+  return response.data;
+};

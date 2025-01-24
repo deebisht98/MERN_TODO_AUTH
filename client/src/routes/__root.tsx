@@ -7,9 +7,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NotFound } from "@/components/NotFound";
+import { InactivityDialog } from "@/components/InactivityDialog";
+import { useSilentRenew } from "@/hooks/useSilentRenew";
 
 export const rootRoute = createRootRoute({
-  component: () => (
+  component: App,
+  notFoundComponent: () => <NotFound />,
+});
+
+function App() {
+  useSilentRenew();
+
+  return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="bg-background text-foreground">
@@ -19,11 +28,11 @@ export const rootRoute = createRootRoute({
           </TooltipProvider>
         </div>
         <Outlet />
+        <InactivityDialog />
         <TanStackRouterDevtools />
       </AuthProvider>
     </QueryClientProvider>
-  ),
-  notFoundComponent: () => <NotFound />,
-});
+  );
+}
 
 export const Route = rootRoute;

@@ -1,14 +1,14 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 const Dialog = DialogPrimitive.Root;
-
 const DialogTrigger = DialogPrimitive.Trigger;
-
 const DialogPortal = DialogPrimitive.Portal;
-
 const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
@@ -105,15 +105,66 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
+const InactivityDialog = () => {
+  const { logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(120);
+
+  useEffect(() => {
+    const events = ["mousemove", "keydown", "click"];
+    let timer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      if (!open) {
+        setTimeLeft(120);
+        clearTimeout(timer);
+        timer = setTimeout(() => setOpen(true), 2 * 60 * 1000);
+      }
+    };
+
+    const countdown = () => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          logout();
+          return 0;
+        }
+        return prev - 1;
+      });
+    };
+
+    events.forEach((event) => window.addEventListener(event, resetTimer));
+    timer = setTimeout(() => setOpen(true), 2 * 60 * 1000);
+    const countdownInterval = setInterval(countdown, 1000);
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
+      clearTimeout(timer);
+      clearInterval(countdownInterval);
+    };
+  }, [logout, open]);
+
+  const handleStayLoggedIn = () => {
+    setOpen(false);
+    setTimeLeft(120);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Inactivity Warning</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          You will be logged out in {timeLeft} seconds due to inactivity.
+        </DialogDescription>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleStayLoggedIn}>
+            Stay Logged In
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
+
+export { InactivityDialog };

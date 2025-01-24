@@ -13,6 +13,8 @@ import {
 import { accessTokenExpiry, refreshTokenExpiry } from "../constants.js";
 import { catchAsync } from "../utils/errorHandler.js";
 import RefreshToken from "../models/refreshTokenSchema.js";
+import jwt from "jsonwebtoken";
+import env from "../env.js";
 
 export const createUser: RequestHandler = catchAsync(async (req, res) => {
   const userData: UserRegisterType = (req as ValidatedRequest).validatedData
@@ -196,5 +198,52 @@ export const checkAuth: RequestHandler = catchAsync(async (req, res) => {
   return sendResponse(res, 200, {
     success: true,
     data: user,
+  });
+});
+
+export const silentRenew: RequestHandler = catchAsync(async (req, res) => {
+  const { refreshToken } = req.signedCookies;
+
+  if (!refreshToken || typeof refreshToken !== "string") {
+    return sendResponse(res, 401, {
+      success: false,
+      message: "Refresh token not found",
+    });
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, env.JWT_SECRET) as { id: string };
+  } catch (error) {
+    return sendResponse(res, 401, {
+      success: false,
+      message: "Invalid refresh token",
+    });
+  }
+
+  const user = await User.findById(decoded.id).select("-password");
+
+  if (!user) {
+    return sendResponse(res, 404, {
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  const newAccessToken = generateToken(user._id as string, "15m");
+  const newRefreshToken = generateToken(user._id as string, "7d");
+
+  await RefreshToken.create({
+    token: newRefreshToken,
+    userId: user._id,
+    expiresAt: new Date(Date.now() + refreshTokenExpiry),
+  });
+
+  setTokenCookie(res, newAccessToken, "accessToken", accessTokenExpiry);
+  setTokenCookie(res, newRefreshToken, "refreshToken", refreshTokenExpiry);
+
+  return sendResponse(res, 200, {
+    success: true,
+    message: "Tokens refreshed successfully",
   });
 });
