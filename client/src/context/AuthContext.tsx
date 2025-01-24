@@ -1,9 +1,7 @@
 import { createContext, useState, useEffect, use } from "react";
-import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { User } from "@/types/User";
 import { checkAuth, logoutUser } from "@/api/authApi";
-
-const PUBLIC_ROUTES = ["/login", "/register", "/forgot-password"];
 
 interface AuthContextType {
   user: User | null;
@@ -19,10 +17,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const isAuthenticated = !!user;
-  const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -30,32 +26,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const response = await checkAuth();
         if (response.success && response.data) {
           setUser(response.data as User);
-          if (isPublicRoute) {
-            navigate({ to: "/tasks" });
-          }
+          navigate({ to: "/tasks" });
         }
       } catch (error) {
         setUser(null);
-        if (!isPublicRoute) {
-          navigate({ to: "/login" });
-        }
+        navigate({ to: "/login" });
       } finally {
         setIsLoading(false);
       }
     };
 
     initAuth();
-  }, [navigate, isPublicRoute]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (isAuthenticated && isPublicRoute) {
-        navigate({ to: "/tasks" });
-      } else if (!isAuthenticated && !isPublicRoute) {
-        navigate({ to: "/login" });
-      }
-    }
-  }, [isAuthenticated, isPublicRoute, isLoading, navigate]);
+  }, [navigate]);
 
   const logout = async () => {
     try {
