@@ -20,7 +20,7 @@ export const TaskCard = ({ task, onEdit, onDelete }: TaskCardProps) => {
 
   return (
     <Card className="task-card">
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex flex-wrap justify-between items-start mb-2">
         <h3
           className={`font-semibold text-lg ${
             task.status === "completed" ? "line-through" : ""

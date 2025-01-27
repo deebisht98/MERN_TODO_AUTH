@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useFetchTasks } from "@/hooks/useFetchTasks";
+import { tasksQueryOptions } from "@/hooks/useFetchTasks";
 import { useUpdateTaskStatus } from "@/hooks/useUpdateTaskStatus";
 import { TaskColumn } from "@/components/TaskColumn";
 import { toast } from "sonner";
@@ -10,13 +10,14 @@ import { useCreateTodo } from "@/hooks/useCreateTodo";
 import { TodoForm } from "@/components/TodoForm";
 import { useDeleteTask } from "@/hooks/useDeleteTask";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/tasks")({
   component: Tasks,
 });
 
 function Tasks() {
-  const { data } = useFetchTasks();
+  const { data } = useSuspenseQuery(tasksQueryOptions);
   const [tasks, setTasks] = useState<Task[]>([]);
   const updateTaskStatus = useUpdateTaskStatus();
   const deleteTaskMutation = useDeleteTask();
@@ -31,7 +32,7 @@ function Tasks() {
     if (data?.data) {
       setTasks(data.data as Task[]);
     }
-  }, [data]);
+  }, [data.data]);
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -170,35 +171,36 @@ function Tasks() {
               Add Todo
             </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(["pending", "in-progress", "completed"] as const).map(
-              (status) => (
-                <div
-                  key={status}
-                  className="transform transition-all duration-200 hover:scale-[1.02]"
-                >
-                  <TaskColumn
-                    title={status}
-                    tasks={getTasksByStatus(status)}
-                    status={status}
-                    onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    className={` backdrop-blur-sm shadow-lg rounded-lg border-0 ${
-                      status === "pending"
-                        ? "bg-red-100/50"
-                        : status === "in-progress"
-                          ? "bg-yellow-100/50"
-                          : "bg-green-100/50"
-                    }`}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteClick}
-                  />
-                </div>
-              )
-            )}
-          </div>
+          <Suspense fallback={<div>Loading...</div>}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {(["pending", "in-progress", "completed"] as const).map(
+                (status) => (
+                  <div
+                    key={status}
+                    className="transform transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    <TaskColumn
+                      title={status}
+                      tasks={getTasksByStatus(status)}
+                      status={status}
+                      onDragStart={handleDragStart}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      className={` backdrop-blur-sm shadow-lg rounded-lg border-0 ${
+                        status === "pending"
+                          ? "bg-red-100/50"
+                          : status === "in-progress"
+                            ? "bg-yellow-100/50"
+                            : "bg-green-100/50"
+                      }`}
+                      onEdit={handleEditClick}
+                      onDelete={handleDeleteClick}
+                    />
+                  </div>
+                )
+              )}
+            </div>
+          </Suspense>
         </div>
       </div>
 

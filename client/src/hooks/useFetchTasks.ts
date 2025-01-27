@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { fetchTodos } from "@/api/taskApi";
 
-export const useFetchTasks = () => {
-  return useQuery({ queryKey: ["tasks"], queryFn: fetchTodos });
-};
+export const tasksQueryOptions = queryOptions({
+  queryKey: ["tasks"],
+  queryFn: fetchTodos,
+});
